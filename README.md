@@ -2,7 +2,7 @@
 
 Instructions to run a dummy NFS server as a pod. NOT FOR PRODUCTION.
 
-This uses the [`go-nfs` project by @willscott](https://github.com/mvazquezc/dummy-nfs-on-ocp).
+This uses the [`go-nfs` project by @willscott](https://github.com/willscott/go-nfs).
 
 ## Deploy the NFS Server
 
