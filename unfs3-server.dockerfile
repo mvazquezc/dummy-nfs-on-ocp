@@ -8,7 +8,7 @@ RUN useradd nfsowner -u 5000 -U -M -s /sbin/nologin
 # You can get rid of the following test line
 RUN echo "This is a testfile owned by user 5000" > /nfs-share/testfile.txt
 # End of test line
-RUN chown -R nfsowner:nfsowner /nfs-share && chmod 0775 /nfs-share && chmod 0660 /nfs-share/*
+RUN chown -R nfsowner:nfsowner /nfs-share && chmod 2775 /nfs-share && chmod 0660 /nfs-share/*
 USER 0
 EXPOSE 2049
 CMD ["start.sh"]
