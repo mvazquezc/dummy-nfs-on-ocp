@@ -10,7 +10,7 @@ RUN mkdir -p /nfs-share
 RUN echo "This is a testfile owned by user 5000" > /nfs-share/testfile.txt
 RUN touch /nfs-share/dummy{1..10} 
 # End of dummy lines
-RUN chown -R 5000:5000 /nfs-share && chmod 2770 /nfs-share
+RUN chown -R 5000:5000 /nfs-share && chmod 2770 /nfs-share && chmod 0660 /nfs-share/*
 USER 5000
 EXPOSE 2049
 CMD ["/usr/bin/nfs-server", "/nfs-share", "2049"]
