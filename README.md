@@ -2,7 +2,7 @@
 
 Instructions to run a dummy NFS server as a pod. NOT FOR PRODUCTION.
 
-This uses the [`go-nfs` project by @willscott](https://github.com/willscott/go-nfs).
+This uses the [unfs3 project](https://github.com/unfs3/unfs3).
 
 ## Deploy the NFS Server
 
@@ -12,7 +12,7 @@ Below command will create:
 
 * A Namespace
 * A ServiceAccount to run the NFS Server
-* A RoleBinding to give access to the `nonroot` SCC to the ServiceAccount
+* A RoleBinding to give access to the `anyuid` SCC to the ServiceAccount
 * A Deployment for the NFS Server
 * A Service for the NFS Server (ClusterIP)
 
@@ -36,11 +36,11 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: nfs-server-nonroot-scc
+  name: nfs-server-anyuid-scc
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: system:openshift:scc:nonroot
+  name: system:openshift:scc:anyuid
 subjects:
 - kind: ServiceAccount
   name: nfs-server
@@ -70,7 +70,7 @@ spec:
       - image: quay.io/mavazque/nfs-server:latest
         name: nfs-server
         securityContext:
-          runAsUser: 5000
+          runAsUser: 0
         ports:
         - containerPort: 2049
         resources: {}
@@ -113,7 +113,7 @@ NAMESPACE=test-nfs
 # Get ClusterIP Service IP
 NFS_SERVER=$(oc -n ${NAMESPACE} get svc nfs-server -o jsonpath='{.spec.clusterIP}')
 # Objects creation
-cat <<EOF | oc create -f -
+cat <<EOF | oc -n ${NAMESPACE} create -f -
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -125,12 +125,11 @@ spec:
     - ReadWriteMany
   nfs:
     server: ${NFS_SERVER}
-    path: "/mount"
+    path: "/nfs-share"
   mountOptions:
     - port=2049
     - mountport=2049
     - nfsvers=3
-    - noacl
     - tcp
 ---
 apiVersion: v1
@@ -165,6 +164,8 @@ spec:
       labels:
         app: reversewords-app-shared-storage
     spec:
+      securityContext:
+        supplementalGroups: [5000]
       volumes:
       - name: shared-volume
         persistentVolumeClaim:
